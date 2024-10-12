@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>CVE-2023-5217 - WebCodecs</title>
+</head>
+
+<body>
+  <script>
+    function startWorker() {
+      let worker = new Worker('webcodecs.js', { name: "Video worker"});
+      worker.onmessage = function(e) {
+        // Recreate worker in case of an error
+        console.log('Worker error: ' + e.data);
+        worker.terminate();
+        startWorker();
+      };
+      worker.postMessage({}, []);
+    }
+
+    function main() {
+      if (!("VideoFrame" in window)) {
+        document.body.innerHTML = "<h1>WebCodecs API is not supported.</h1>";
+        return;
+      }
+      startWorker();
+    }
+
+    document.body.onload = main;
+  </script>
+
+</body>
+
+</html>

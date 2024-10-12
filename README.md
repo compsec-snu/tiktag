@@ -114,6 +114,35 @@ $ cd /data/local/tmp/fuzzer
 $ ./run-fuzzer.sh
 ```
 
+## Real-World Exploits
+
+### Chrome V8 JavaScript Engine
+
+We crafted a TikTag-v2 gadget in JavaScript that can leak the tag of
+the entire renderer process memory space. Utilizing the leaked tag,
+this PoC exploits the recent heap overflow vulnerability
+[CVE-2023-5217](https://github.com/UT-Security/cve-2023-5217-poc) in
+the libvpx library to bypass the MTE protection and trigger the memory
+corruption.
+
+The exploit was effective on Chromium version 125.0.6422.231, with
+several modifications to backport CVE-2023-5217 in libvpx and get
+renderer object address by `browser-exploit/chromium.patch`. 
+
+Set up the PoC:
+```sh
+$ pushd browser-exploit
+$ npm install express serve-static yargs
+$ node server.js
+```
+
+On the Pixel device: 
+1. Enable MTE on the Chromium browser (see https://googleprojectzero.blogspot.com/2023/11/first-handset-with-mte-on-market.html).
+2. Open the browser and visit `https://<host>:8000`.
+
+On the host:
+1. Check the debugging log with `./chrome_public_apk logcat -d <Device id>` and `chrome://inspect`.
+
 ## Paper
 [TikTag: Breaking ARM's Memory Tagging Extension with Speculative Execution (under review)](https://arxiv.org/abs/2406.08719)
 
